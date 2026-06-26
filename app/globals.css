@@ -1,26 +1,929 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-roboto-sans), Roboto, Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-roboto-mono), "Roboto Mono", Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================================================
+   CASA PÉ N'AREIA — GLOBAL THEME
+   ========================================================= */
+
+:root {
+  --font-roboto-sans: Roboto, Arial, Helvetica, sans-serif;
+  --font-roboto-mono: "Roboto Mono", Consolas, monospace;
+
+  --background: #ffffff;
+  --foreground: #07343b;
+
+  --app-bg: #f5fbfb;
+  --app-bg-soft: #eef8f9;
+
+  --app-card: #ffffff;
+  --app-card-soft: #f8fdfd;
+
+  --app-text: #07343b;
+  --app-text-soft: #4f7076;
+  --app-text-muted: #78959a;
+
+  --app-primary: #0b5963;
+  --app-primary-strong: #07474f;
+  --app-primary-soft: #e2f4f6;
+
+  --app-teal: #0f7f8c;
+  --app-teal-light: #27b4c4;
+  --app-teal-muted: #d7edf0;
+
+  --app-border: #d7edf0;
+  --app-border-strong: #b9dfe4;
+
+  --app-danger: #dc2626;
+  --app-danger-strong: #b91c1c;
+
+  --app-shadow: 0 18px 45px rgba(7, 52, 59, 0.08);
+  --app-shadow-soft: 0 10px 30px rgba(7, 52, 59, 0.06);
+}
+
+.dark {
+  --background: #061417;
+  --foreground: #f5fbfb;
+
+  --app-bg: #061417;
+  --app-bg-soft: #092126;
+
+  --app-card: #0a1d22;
+  --app-card-soft: #0d272d;
+
+  --app-text: #f5fbfb;
+  --app-text-soft: #b8d4d8;
+  --app-text-muted: #7fa5aa;
+
+  --app-primary: #27b4c4;
+  --app-primary-strong: #5ed2dd;
+  --app-primary-soft: rgba(39, 180, 196, 0.14);
+
+  --app-teal: #27b4c4;
+  --app-teal-light: #5ed2dd;
+  --app-teal-muted: rgba(39, 180, 196, 0.18);
+
+  --app-border: rgba(215, 237, 240, 0.13);
+  --app-border-strong: rgba(215, 237, 240, 0.24);
+
+  --app-danger: #ef4444;
+  --app-danger-strong: #dc2626;
+
+  --app-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+  --app-shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.22);
+}
+
+/* =========================================================
+   RESET BASE
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-roboto-sans), Roboto, Arial, Helvetica, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
 }
 
 body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: var(--font-roboto-sans), Roboto, Arial, Helvetica, sans-serif;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+button,
+input,
+textarea,
+select,
+option {
+  font-family: var(--font-roboto-sans), Roboto, Arial, Helvetica, sans-serif;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-roboto-mono), "Roboto Mono", Consolas, monospace;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+img,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:not([class]) {
+  color: inherit;
+}
+
+input,
+textarea,
+select {
+  color: inherit;
+}
+
+::selection {
+  background: var(--app-primary);
+  color: #ffffff;
+}
+
+.dark ::selection {
+  background: var(--app-teal-light);
+  color: #061417;
+}
+
+/* =========================================================
+   FORCE ROBOTO
+   ========================================================= */
+
+html,
+body,
+main,
+section,
+article,
+aside,
+header,
+footer,
+nav,
+div,
+span,
+p,
+a,
+button,
+input,
+textarea,
+select,
+label,
+table,
+thead,
+tbody,
+tr,
+th,
+td,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-roboto-sans), Roboto, Arial, Helvetica, sans-serif;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-roboto-mono), "Roboto Mono", Consolas, monospace;
+}
+
+/* =========================================================
+   ADMIN BACKGROUNDS / CARDS
+   ========================================================= */
+
+.cpa-admin-shell {
+  --admin-bg: #eef8f9;
+  --admin-surface: #ffffff;
+  --admin-surface-soft: #f7fcfc;
+  --admin-surface-elevated: #ffffff;
+  --admin-surface-muted: #f4fbfb;
+  --admin-border: #d7edf0;
+  --admin-border-strong: #b9dfe4;
+  --admin-text: #07343b;
+  --admin-muted: #54727a;
+  --admin-muted-2: #64748b;
+  --admin-shadow: 0 10px 30px rgba(7, 52, 59, 0.06);
+  --admin-hero-gradient: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #f4fbfb 45%,
+    #eef8f9 100%
+  );
+
+  --app-bg: var(--admin-bg);
+  --app-bg-soft: var(--admin-bg);
+  --app-card: var(--admin-surface);
+  --app-card-soft: var(--admin-surface-soft);
+  --app-border: var(--admin-border);
+  --app-border-strong: var(--admin-border-strong);
+  --app-text: var(--admin-text);
+  --app-text-soft: var(--admin-muted);
+  --app-text-muted: var(--admin-muted-2);
+  --app-shadow-soft: var(--admin-shadow);
+}
+
+.cpa-admin-shell[data-theme="dark"] {
+  --admin-bg: #071e23;
+  --admin-surface: #0d2b31;
+  --admin-surface-soft: #12363d;
+  --admin-surface-elevated: #11343b;
+  --admin-surface-muted: #0a252b;
+  --admin-border: rgba(255, 255, 255, 0.1);
+  --admin-border-strong: rgba(255, 255, 255, 0.18);
+  --admin-text: #e8fbff;
+  --admin-muted: rgba(232, 251, 255, 0.68);
+  --admin-muted-2: rgba(232, 251, 255, 0.52);
+  --admin-shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
+  --admin-hero-gradient: linear-gradient(
+    135deg,
+    #0d2b31 0%,
+    #102f36 45%,
+    #071e23 100%
+  );
+
+  --app-primary-soft: rgba(39, 180, 196, 0.14);
+}
+
+.cpa-admin-shell {
+  background: var(--admin-bg);
+  color: var(--admin-text);
+}
+
+.cpa-admin-shell .admin-page-bg {
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(39, 180, 196, 0.14),
+      transparent 34%
+    ),
+    linear-gradient(180deg, var(--admin-bg), var(--admin-surface-muted));
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(.bg-white) {
+  background-color: var(--admin-surface) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(.bg-white\/80, .bg-white\/90, .bg-white\/92, .bg-white\/95, .bg-white\/96) {
+  background-color: color-mix(in srgb, var(--admin-surface) 90%, transparent) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(.bg-white\/5, .bg-white\/10, .bg-white\/12) {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(
+  .bg-\[\#f7fcfc\],
+  .bg-\[\#eef8f9\],
+  .bg-\[\#f4fbfb\],
+  .bg-\[\#f0fafb\]
+) {
+  background-color: var(--admin-surface-soft) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(
+  .bg-slate-50,
+  .bg-slate-100,
+  .hover\:bg-slate-50:hover,
+  .hover\:bg-\[\#f7fcfc\]:hover,
+  .hover\:bg-\[\#f0fafb\]:hover
+) {
+  background-color: var(--admin-surface-soft) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(
+  .border-slate-100,
+  .border-slate-200,
+  .border-\[\#d7edf0\]
+) {
+  border-color: var(--admin-border) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(
+  .text-slate-400,
+  .placeholder\:text-slate-400::placeholder
+) {
+  color: var(--admin-muted-2) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(
+  .text-slate-500,
+  .text-\[\#54727a\]
+) {
+  color: var(--admin-muted) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(
+  .text-slate-600,
+  .text-slate-700
+) {
+  color: var(--admin-text) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(input, select, textarea) {
+  background-color: var(--admin-surface-soft) !important;
+  border-color: var(--admin-border) !important;
+  color: var(--admin-text) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(input::placeholder, textarea::placeholder) {
+  color: var(--admin-muted-2) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(option) {
+  background-color: var(--admin-surface);
+  color: var(--admin-text);
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(table thead tr) {
+  background-color: var(--admin-surface-soft) !important;
+  color: var(--admin-muted-2) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(table tbody tr:hover) {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(th, td) {
+  border-color: var(--admin-border) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(.shadow-\[var\(--app-shadow-soft\)\]) {
+  box-shadow: var(--admin-shadow) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(.admin-btn-secondary, .admin-card) {
+  background: var(--admin-surface);
+  border-color: var(--admin-border);
+  color: var(--admin-text) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] :where(.admin-fullcalendar) {
+  color: var(--admin-text);
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc {
+  color: var(--admin-text);
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-toolbar-title,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-daygrid-day-number,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-list-event-title,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-list-event-time {
+  color: var(--admin-text) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-button {
+  background: var(--admin-surface-soft) !important;
+  border-color: var(--admin-border) !important;
+  color: var(--admin-text) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-button:hover,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-button:focus {
+  background: var(--app-primary-soft) !important;
+  border-color: var(--app-primary) !important;
+  color: var(--app-primary-strong) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-button-primary:not(:disabled).fc-button-active,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-button-primary:not(:disabled):active {
+  background: var(--app-primary) !important;
+  border-color: var(--app-primary) !important;
+  color: #ffffff !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-col-header-cell,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-list-day-cushion {
+  background: var(--admin-surface-soft) !important;
+  color: var(--admin-text) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-col-header-cell-cushion {
+  color: var(--admin-muted) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-daygrid-day,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-scrollgrid,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-scrollgrid-section > *,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-timegrid-slot,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-list,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-list-table td,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-list-day-cushion {
+  background: var(--admin-surface) !important;
+  border-color: var(--admin-border) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-day-today {
+  background: rgba(39, 180, 196, 0.12) !important;
+}
+
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-event,
+.cpa-admin-shell[data-theme="dark"] .admin-fullcalendar .fc .fc-event-title {
+  color: #ffffff !important;
+}
+
+.admin-page-bg {
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(39, 180, 196, 0.16),
+      transparent 34%
+    ),
+    linear-gradient(180deg, var(--app-bg), var(--app-bg-soft));
+}
+
+.admin-glass {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid var(--app-border);
+  backdrop-filter: blur(18px);
+}
+
+.dark .admin-glass {
+  background: rgba(10, 29, 34, 0.82);
+  border-color: var(--app-border);
+}
+
+.admin-card {
+  background: var(--app-card);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow-soft);
+}
+
+.admin-card-hover {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.admin-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--app-border-strong);
+  box-shadow: var(--app-shadow);
+}
+
+.admin-muted-grid {
+  background-image:
+    linear-gradient(rgba(15, 127, 140, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 127, 140, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.dark .admin-muted-grid {
+  background-image:
+    linear-gradient(rgba(39, 180, 196, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(39, 180, 196, 0.055) 1px, transparent 1px);
+}
+
+/* =========================================================
+   BUTTON UTILITIES
+   ========================================================= */
+
+.admin-btn-primary,
+a.admin-btn-primary,
+button.admin-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  background: var(--app-primary);
+  color: #ffffff !important;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: var(--app-shadow-soft);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.admin-btn-primary:hover,
+a.admin-btn-primary:hover,
+button.admin-btn-primary:hover {
+  background: var(--app-primary-strong);
+  color: #ffffff !important;
+  box-shadow: var(--app-shadow);
+}
+
+.admin-btn-primary svg,
+a.admin-btn-primary svg,
+button.admin-btn-primary svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.admin-btn-teal,
+a.admin-btn-teal,
+button.admin-btn-teal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, var(--app-teal), var(--app-teal-light));
+  color: #ffffff !important;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: var(--app-shadow-soft);
+  transition:
+    filter 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.admin-btn-teal:hover,
+a.admin-btn-teal:hover,
+button.admin-btn-teal:hover {
+  filter: brightness(0.96);
+  color: #ffffff !important;
+  box-shadow: var(--app-shadow);
+}
+
+.admin-btn-teal svg,
+a.admin-btn-teal svg,
+button.admin-btn-teal svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.admin-btn-secondary,
+a.admin-btn-secondary,
+button.admin-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  border-radius: 1rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-card);
+  color: var(--app-primary) !important;
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.admin-btn-secondary:hover,
+a.admin-btn-secondary:hover,
+button.admin-btn-secondary:hover {
+  border-color: var(--app-border-strong);
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong) !important;
+}
+
+.admin-btn-danger,
+a.admin-btn-danger,
+button.admin-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  background: var(--app-danger);
+  color: #ffffff !important;
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.admin-btn-danger:hover,
+a.admin-btn-danger:hover,
+button.admin-btn-danger:hover {
+  background: var(--app-danger-strong);
+  color: #ffffff !important;
+}
+
+.admin-btn-danger svg,
+a.admin-btn-danger svg,
+button.admin-btn-danger svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+a[class*="bg-[var(--app-primary)]"],
+button[class*="bg-[var(--app-primary)]"],
+a[class*="bg-[var(--app-teal)]"],
+button[class*="bg-[var(--app-teal)]"],
+a[class*="bg-[var(--app-primary-strong)]"],
+button[class*="bg-[var(--app-primary-strong)]"] {
+  color: #ffffff !important;
+}
+
+a[class*="bg-[var(--app-primary)]"] svg,
+button[class*="bg-[var(--app-primary)]"] svg,
+a[class*="bg-[var(--app-teal)]"] svg,
+button[class*="bg-[var(--app-teal)]"] svg,
+a[class*="bg-[var(--app-primary-strong)]"] svg,
+button[class*="bg-[var(--app-primary-strong)]"] svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.bg-\[var\(--app-primary\)\] a,
+.bg-\[var\(--app-primary\)\] button {
+  color: inherit;
+}
+
+/* =========================================================
+   SPECIFIC FIXED BUTTONS
+   ========================================================= */
+
+.admin-reservation-view-button,
+.admin-reservation-view-button:visited {
+  background: #0b5963 !important;
+  color: #ffffff !important;
+  border-color: #0b5963 !important;
+  text-decoration: none !important;
+}
+
+.admin-reservation-view-button:hover,
+.admin-reservation-view-button:focus,
+.admin-reservation-view-button:active {
+  background: #084952 !important;
+  color: #ffffff !important;
+  border-color: #084952 !important;
+  text-decoration: none !important;
+}
+
+.admin-reservation-view-button svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.admin-login-submit-button,
+.admin-login-submit-button:visited {
+  background: #27b4c4 !important;
+  border-color: #27b4c4 !important;
+  color: #052f35 !important;
+  text-decoration: none !important;
+}
+
+.admin-login-submit-button:hover,
+.admin-login-submit-button:focus,
+.admin-login-submit-button:active {
+  background: #4bc7d4 !important;
+  border-color: #4bc7d4 !important;
+  color: #052f35 !important;
+  text-decoration: none !important;
+}
+
+.admin-login-submit-button svg {
+  stroke: #052f35 !important;
+}
+
+.admin-sidebar-logout-button,
+.admin-sidebar-logout-button:hover,
+.admin-sidebar-logout-button:focus,
+.admin-sidebar-logout-button:active {
+  text-decoration: none !important;
+}
+
+.admin-sidebar-logout-button svg {
+  stroke: currentColor !important;
+}
+
+/* =========================================================
+   FORMS / INPUTS / CHROME AUTOFILL FIX
+   ========================================================= */
+
+button,
+input,
+textarea,
+select {
+  outline: none !important;
+}
+
+button:focus,
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none !important;
+}
+
+input,
+textarea,
+select {
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  background-clip: padding-box;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Remove a máscara visual do Chrome autofill sem quebrar dark mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus,
+select:-webkit-autofill:active {
+  -webkit-text-fill-color: inherit !important;
+  caret-color: currentColor !important;
+  border-color: inherit !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  transition:
+    background-color 999999s ease-in-out 0s,
+    color 999999s ease-in-out 0s !important;
+}
+
+/* Autofill dentro do login escuro */
+.admin-login-page input:-webkit-autofill,
+.admin-login-page input:-webkit-autofill:hover,
+.admin-login-page input:-webkit-autofill:focus,
+.admin-login-page input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.07) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.07) inset !important;
+  border-radius: 1rem !important;
+}
+
+/* Autofill dentro do painel claro */
+.cpa-admin-shell:not([data-theme="dark"]) input:-webkit-autofill,
+.cpa-admin-shell:not([data-theme="dark"]) input:-webkit-autofill:hover,
+.cpa-admin-shell:not([data-theme="dark"]) input:-webkit-autofill:focus,
+.cpa-admin-shell:not([data-theme="dark"]) input:-webkit-autofill:active,
+.cpa-admin-shell:not([data-theme="dark"]) textarea:-webkit-autofill,
+.cpa-admin-shell:not([data-theme="dark"]) textarea:-webkit-autofill:hover,
+.cpa-admin-shell:not([data-theme="dark"]) textarea:-webkit-autofill:focus,
+.cpa-admin-shell:not([data-theme="dark"]) textarea:-webkit-autofill:active {
+  -webkit-text-fill-color: #07343b !important;
+  caret-color: #07343b !important;
+  box-shadow: 0 0 0 1000px var(--admin-surface-soft) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--admin-surface-soft) inset !important;
+}
+
+/* Autofill dentro do painel escuro */
+.cpa-admin-shell[data-theme="dark"] input:-webkit-autofill,
+.cpa-admin-shell[data-theme="dark"] input:-webkit-autofill:hover,
+.cpa-admin-shell[data-theme="dark"] input:-webkit-autofill:focus,
+.cpa-admin-shell[data-theme="dark"] input:-webkit-autofill:active,
+.cpa-admin-shell[data-theme="dark"] textarea:-webkit-autofill,
+.cpa-admin-shell[data-theme="dark"] textarea:-webkit-autofill:hover,
+.cpa-admin-shell[data-theme="dark"] textarea:-webkit-autofill:focus,
+.cpa-admin-shell[data-theme="dark"] textarea:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--admin-text) !important;
+  caret-color: var(--admin-text) !important;
+  box-shadow: 0 0 0 1000px var(--admin-surface-soft) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--admin-surface-soft) inset !important;
+}
+
+/* Remove highlights nativos agressivos no mobile/WebKit */
+input,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   TABLES / MEDIA
+   ========================================================= */
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+img {
+  background-color: rgba(215, 237, 240, 0.45);
+}
+
+.dark img {
+  background-color: rgba(39, 180, 196, 0.08);
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 127, 140, 0.35) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(15, 127, 140, 0.3);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 127, 140, 0.5);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.dark * {
+  scrollbar-color: rgba(39, 180, 196, 0.35) transparent;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: rgba(39, 180, 196, 0.28);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: content-box;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: rgba(39, 180, 196, 0.45);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes adminFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-fade-in {
+  animation: adminFadeIn 180ms ease-out both;
 }
