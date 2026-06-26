@@ -22,6 +22,7 @@ import {
   PlugZap,
   Settings,
   ShieldCheck,
+  Sparkles,
   Sun,
   UserRound,
   Users,
@@ -81,6 +82,11 @@ const menuItems: MenuItem[] = [
     icon: WalletCards,
   },
   {
+    label: "Upgrades",
+    href: "/admin/upgrades",
+    icon: Sparkles,
+  },
+  {
     label: "Bloqueios",
     href: "/admin/bloqueios",
     icon: LockKeyhole,
@@ -133,6 +139,7 @@ function getPageTitle(pathname: string) {
   if (pathname.includes("/admin/acomodacoes")) return "Acomodações";
   if (pathname.includes("/admin/calendario")) return "Calendário";
   if (pathname.includes("/admin/tarifas")) return "Tarifas";
+  if (pathname.includes("/admin/upgrades")) return "Upgrades";
   if (pathname.includes("/admin/bloqueios")) return "Bloqueios";
 
   if (pathname.includes("/admin/mapa-reservas")) {
@@ -166,6 +173,10 @@ function getPageSubtitle(pathname: string) {
 
   if (pathname.includes("/admin/tarifas")) {
     return "Gerencie temporadas, datas especiais, feriados e regras de preço.";
+  }
+
+  if (pathname.includes("/admin/upgrades")) {
+    return "Gerencie extras opcionais e onde eles aparecem no fluxo de reserva.";
   }
 
   if (pathname.includes("/admin/automacoes")) {

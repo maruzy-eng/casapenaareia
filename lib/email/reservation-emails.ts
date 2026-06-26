@@ -11,6 +11,7 @@ type ReservationEmailInput = {
   guestsCount: number | string;
   nights: number | string;
   total: number | string;
+  upgradesSummary?: string | null;
 };
 
 type SystemSettings = {
@@ -196,6 +197,16 @@ function reservationSummary({
       <p style="margin:14px 0 0;padding-top:14px;border-top:1px solid #d6d3d1;font-size:18px;color:#0c0a09;">
         <strong>Total:</strong> ${formatMoney(input.total, settings.currency)}
       </p>
+      ${
+        input.upgradesSummary
+          ? `
+            <p style="margin:14px 0 0;font-size:14px;line-height:1.6;color:#57534e;">
+              <strong style="color:#0c0a09;">Upgrades:</strong><br />
+              ${formatMultilineText(input.upgradesSummary)}
+            </p>
+          `
+          : ""
+      }
     </div>
   `;
 }

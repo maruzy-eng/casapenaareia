@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 
 import { calculateReservationPricing } from "@/lib/booking/pricing";
 import { checkUnitAvailability } from "@/lib/booking/availability";
+import {
+  buildReservationUpgradeRows,
+  getSelectedAvailableUpgrades,
+  normalizeSelectedUpgradeIds,
+} from "@/lib/booking/upgrades";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,6 +31,7 @@ export type ManualReservationPayload = {
   status: string;
   payment_status: string;
   notes?: string;
+  selected_upgrade_ids?: string[];
 };
 
 async function requireAdminAccess() {
@@ -84,6 +90,9 @@ function validatePayload(payload: ManualReservationPayload) {
   const checkIn = normalizeText(payload.check_in);
   const checkOut = normalizeText(payload.check_out);
   const guestsCount = Number(payload.guests_count || 1);
+  const selectedUpgradeIds = normalizeSelectedUpgradeIds(
+    payload.selected_upgrade_ids
+  );
 
   if (!unitId) {
     throw new Error("Selecione uma acomodação.");
@@ -118,6 +127,7 @@ function validatePayload(payload: ManualReservationPayload) {
     payment_status:
       normalizeText(payload.payment_status) || "pending",
     notes: normalizeText(payload.notes) || null,
+    selected_upgrade_ids: selectedUpgradeIds,
   };
 }
 
@@ -256,12 +266,20 @@ export async function createManualReservationAction(
     throw new Error("Não foi possível buscar as regras de preço.");
   }
 
+  const selectedUpgrades = await getSelectedAvailableUpgrades({
+    unitId: data.unit_id,
+    selectedUpgradeIds: data.selected_upgrade_ids,
+  });
+
   const pricing = calculateReservationPricing({
     unitId: unit.id,
     basePrice: unit.base_price,
     checkIn: data.check_in,
     checkOut: data.check_out,
     rules: rules || [],
+    guestsCount: data.guests_count,
+    selectedUpgradeIds: selectedUpgrades.map((upgrade) => upgrade.id),
+    upgrades: selectedUpgrades,
   });
 
   const guestId = await findOrCreateGuest({
@@ -294,6 +312,22 @@ export async function createManualReservationAction(
   if (reservationError || !createdReservation) {
     console.error("Erro ao criar reserva:", reservationError);
     throw new Error("Não foi possível criar a reserva.");
+  }
+
+  if (pricing.upgradesBreakdown.length > 0) {
+    const { error: upgradesError } = await adminClient
+      .from("reservation_upgrades")
+      .insert(
+        buildReservationUpgradeRows({
+          reservationId: createdReservation.id,
+          upgradesBreakdown: pricing.upgradesBreakdown,
+        })
+      );
+
+    if (upgradesError) {
+      console.error("Erro ao salvar upgrades da reserva:", upgradesError);
+      throw new Error("Reserva criada, mas não foi possível salvar os upgrades.");
+    }
   }
 
   revalidatePath("/admin/dashboard");

@@ -237,6 +237,16 @@ export default async function AdminReservationDetailPage({
         phone,
         country,
         created_at
+      ),
+      reservation_upgrades (
+        id,
+        upgrade_id,
+        name,
+        pricing_type,
+        unit_price,
+        quantity,
+        total,
+        created_at
       )
     `
     )
@@ -257,6 +267,15 @@ export default async function AdminReservationDetailPage({
 
   const status = String(reservation.status || "pending");
   const paymentStatus = String(reservation.payment_status || "unpaid");
+  const reservationUpgrades = Array.isArray(
+    reservation.reservation_upgrades
+  )
+    ? reservation.reservation_upgrades
+    : [];
+  const upgradesSubtotal = reservationUpgrades.reduce(
+    (sum, upgrade) => sum + Number(upgrade.total || 0),
+    0
+  );
 
   return (
     <div className="space-y-6 font-sans">
@@ -520,6 +539,16 @@ export default async function AdminReservationDetailPage({
 
                 <div className="flex items-center justify-between rounded-2xl border border-[var(--app-border)] bg-[var(--app-card-soft)] p-4">
                   <span className="text-sm font-medium text-[var(--app-text-soft)]">
+                    Upgrades
+                  </span>
+
+                  <span className="font-black text-[var(--app-text)]">
+                    {formatMoney(upgradesSubtotal)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between rounded-2xl border border-[var(--app-border)] bg-[var(--app-card-soft)] p-4">
+                  <span className="text-sm font-medium text-[var(--app-text-soft)]">
                     Taxa de limpeza
                   </span>
 
@@ -537,6 +566,32 @@ export default async function AdminReservationDetailPage({
                     {formatMoney(reservation.discount)}
                   </span>
                 </div>
+
+                {reservationUpgrades.length > 0 ? (
+                  <div className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-card-soft)] p-4">
+                    <p className="text-sm font-black text-[var(--app-text)]">
+                      Upgrades selecionados
+                    </p>
+
+                    <div className="mt-3 space-y-2">
+                      {reservationUpgrades.map((upgrade) => (
+                        <div
+                          key={upgrade.id}
+                          className="flex items-center justify-between gap-3 text-sm"
+                        >
+                          <span className="text-[var(--app-text-soft)]">
+                            {upgrade.name} · {formatMoney(upgrade.unit_price)} x{" "}
+                            {formatNumber(upgrade.quantity)}
+                          </span>
+
+                          <strong className="text-[var(--app-text)]">
+                            {formatMoney(upgrade.total)}
+                          </strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className="flex items-center justify-between rounded-2xl bg-[var(--app-primary)] p-5 text-white">
                   <span className="text-sm font-bold text-white/80">Total</span>

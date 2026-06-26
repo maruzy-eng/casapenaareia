@@ -7,6 +7,8 @@ import {
 } from "@/lib/booking/pricing";
 import { checkUnitAvailability } from "@/lib/booking/availability";
 import { createReservation } from "@/lib/actions/reservations";
+import { UpgradeSelector } from "@/components/public/upgrade-selector";
+import { getAvailableUpgradesForUnit } from "@/lib/booking/upgrades";
 
 type ReservationPageProps = {
   searchParams: Promise<{
@@ -312,6 +314,7 @@ export default async function ReservationPage({
 
   const cleaningFee = Number(unit.cleaning_fee || 0);
   const total = pricing.total + cleaningFee;
+  const availableUpgrades = await getAvailableUpgradesForUnit(unit.id);
 
   const averageNightlyRate =
     pricing.nights > 0 ? pricing.subtotal / pricing.nights : 0;
@@ -432,6 +435,16 @@ export default async function ReservationPage({
               placeholder="Alguma observação importante?"
             />
           </label>
+
+          <UpgradeSelector
+            unitId={unit.id}
+            checkIn={checkIn}
+            checkOut={checkOut}
+            guestsCount={guests}
+            availableUpgrades={availableUpgrades}
+            initialPricing={pricing}
+            cleaningFee={cleaningFee}
+          />
 
           <button
             type="submit"

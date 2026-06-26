@@ -32,6 +32,28 @@ export type PricingNight = {
   }[];
 };
 
+export type UpgradePricingType =
+  | "per_night"
+  | "per_stay"
+  | "per_guest_per_night"
+  | "per_guest_per_stay";
+
+export type ReservationUpgradeInput = {
+  id: string;
+  name: string;
+  price: number | string;
+  pricing_type: UpgradePricingType;
+};
+
+export type ReservationUpgradeBreakdown = {
+  id: string;
+  name: string;
+  pricing_type: UpgradePricingType;
+  unit_price: number;
+  quantity: number;
+  total: number;
+};
+
 export type PricingResult = {
   unitId: string;
   checkIn: string;
@@ -39,6 +61,8 @@ export type PricingResult = {
   basePrice: number;
   nights: number;
   subtotal: number;
+  lodgingSubtotal: number;
+  upgradesSubtotal: number;
   total: number;
   minimumNights: number | null;
   minimumNightsRuleName: string | null;
@@ -51,6 +75,7 @@ export type PricingResult = {
     adjustment_value: number;
     priority: number;
   }[];
+  upgradesBreakdown: ReservationUpgradeBreakdown[];
 };
 
 export type LegacyBookingPriceResult = {
@@ -67,6 +92,9 @@ type CalculateReservationPricingInput = {
   checkIn: string;
   checkOut: string;
   rules: PricingRule[];
+  selectedUpgradeIds?: string[];
+  guestsCount?: number;
+  upgrades?: ReservationUpgradeInput[];
 };
 
 function parseDateUTC(value: string) {
@@ -100,6 +128,56 @@ function diffDaysUTC(start: Date, end: Date) {
 
 function roundMoney(value: number) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+function calculateUpgradeQuantity({
+  pricingType,
+  nights,
+  guestsCount,
+}: {
+  pricingType: UpgradePricingType;
+  nights: number;
+  guestsCount: number;
+}) {
+  if (pricingType === "per_night") return nights;
+  if (pricingType === "per_guest_per_night") return guestsCount * nights;
+  if (pricingType === "per_guest_per_stay") return guestsCount;
+
+  return 1;
+}
+
+function calculateUpgradesBreakdown({
+  upgrades,
+  selectedUpgradeIds,
+  nights,
+  guestsCount,
+}: {
+  upgrades: ReservationUpgradeInput[];
+  selectedUpgradeIds: string[];
+  nights: number;
+  guestsCount: number;
+}) {
+  const selectedSet = new Set(selectedUpgradeIds);
+
+  return upgrades
+    .filter((upgrade) => selectedSet.has(upgrade.id))
+    .map((upgrade) => {
+      const unitPrice = roundMoney(Number(upgrade.price || 0));
+      const quantity = calculateUpgradeQuantity({
+        pricingType: upgrade.pricing_type,
+        nights,
+        guestsCount,
+      });
+
+      return {
+        id: upgrade.id,
+        name: upgrade.name,
+        pricing_type: upgrade.pricing_type,
+        unit_price: unitPrice,
+        quantity,
+        total: roundMoney(unitPrice * quantity),
+      };
+    });
 }
 
 function isRuleForUnit(rule: PricingRule, unitId: string) {
@@ -167,8 +245,12 @@ export function calculateReservationPricing({
   checkIn,
   checkOut,
   rules,
+  selectedUpgradeIds = [],
+  guestsCount = 1,
+  upgrades = [],
 }: CalculateReservationPricingInput): PricingResult {
   const normalizedBasePrice = Number(basePrice || 0);
+  const normalizedGuestsCount = Math.max(1, Number(guestsCount || 1));
 
   if (!unitId) {
     throw new Error("Acomodação inválida.");
@@ -272,8 +354,20 @@ export function calculateReservationPricing({
     });
   }
 
-  const subtotal = nightsBreakdown.reduce(
+  const lodgingSubtotal = nightsBreakdown.reduce(
     (sum, night) => sum + night.finalPrice,
+    0
+  );
+
+  const upgradesBreakdown = calculateUpgradesBreakdown({
+    upgrades,
+    selectedUpgradeIds,
+    nights,
+    guestsCount: normalizedGuestsCount,
+  });
+
+  const upgradesSubtotal = upgradesBreakdown.reduce(
+    (sum, upgrade) => sum + upgrade.total,
     0
   );
 
@@ -288,20 +382,26 @@ export function calculateReservationPricing({
     });
   });
 
+  const roundedLodgingSubtotal = roundMoney(lodgingSubtotal);
+  const roundedUpgradesSubtotal = roundMoney(upgradesSubtotal);
+
   return {
     unitId,
     checkIn,
     checkOut,
     basePrice: roundMoney(normalizedBasePrice),
     nights,
-    subtotal: roundMoney(subtotal),
-    total: roundMoney(subtotal),
+    subtotal: roundedLodgingSubtotal,
+    lodgingSubtotal: roundedLodgingSubtotal,
+    upgradesSubtotal: roundedUpgradesSubtotal,
+    total: roundMoney(roundedLodgingSubtotal + roundedUpgradesSubtotal),
     minimumNights,
     minimumNightsRuleName: strongestMinimumRule?.name || null,
     nightsBreakdown,
     appliedRulesSummary: Array.from(appliedRulesMap.values()).sort(
       (first, second) => second.priority - first.priority
     ),
+    upgradesBreakdown,
   };
 }
 

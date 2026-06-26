@@ -46,6 +46,7 @@ const sampleVariables = {
   check_in: "29/12/2026",
   check_out: "02/01/2027",
   total: "US$ 2.480,00",
+  upgrades_summary: "Café da manhã: US$ 200,00",
 };
 
 function replacePreviewVariables(html: string) {
@@ -54,7 +55,8 @@ function replacePreviewVariables(html: string) {
     .replaceAll("{{unit_name}}", sampleVariables.unit_name)
     .replaceAll("{{check_in}}", sampleVariables.check_in)
     .replaceAll("{{check_out}}", sampleVariables.check_out)
-    .replaceAll("{{total}}", sampleVariables.total);
+    .replaceAll("{{total}}", sampleVariables.total)
+    .replaceAll("{{upgrades_summary}}", sampleVariables.upgrades_summary);
 }
 
 function buildEditorState(template: EmailTemplateItem): EditorState {
@@ -478,6 +480,7 @@ export function EmailTemplatesClient({
                 <VariableBadge value="{{check_in}}" />
                 <VariableBadge value="{{check_out}}" />
                 <VariableBadge value="{{total}}" />
+                <VariableBadge value="{{upgrades_summary}}" />
               </div>
             </div>
 

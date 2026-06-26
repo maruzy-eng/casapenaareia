@@ -5,6 +5,10 @@ import {
   type PricingResult,
   type PricingRule,
 } from "@/lib/booking/pricing";
+import {
+  getAvailableUpgradesForUnit,
+  normalizeSelectedUpgradeIds,
+} from "@/lib/booking/upgrades";
 import { getUnavailableUnitIds } from "@/lib/booking/availability";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -15,6 +19,7 @@ type BookingQuotePayload = {
   checkIn?: string;
   checkOut?: string;
   guestsCount?: number;
+  selectedUpgradeIds?: string[];
 };
 
 type QuoteUnit = {
@@ -33,6 +38,7 @@ type BookingQuote = {
   };
   available: boolean;
   pricing: PricingResult | null;
+  availableUpgrades?: Awaited<ReturnType<typeof getAvailableUpgradesForUnit>>;
   message?: string;
 };
 
@@ -54,6 +60,9 @@ function normalizePayload(payload: BookingQuotePayload) {
   const checkIn = String(payload.checkIn || "").trim();
   const checkOut = String(payload.checkOut || "").trim();
   const guestsCount = Number(payload.guestsCount || 1);
+  const selectedUpgradeIds = normalizeSelectedUpgradeIds(
+    payload.selectedUpgradeIds
+  );
 
   if (!isValidYmd(checkIn) || !isValidYmd(checkOut) || checkOut <= checkIn) {
     throw new Error("Informe check-in e check-out válidos.");
@@ -68,6 +77,7 @@ function normalizePayload(payload: BookingQuotePayload) {
     checkIn,
     checkOut,
     guestsCount,
+    selectedUpgradeIds,
   };
 }
 
@@ -132,7 +142,7 @@ export async function POST(request: Request) {
     const rules = (rulesResult.data || []) as PricingRule[];
     const units = (unitsResult.data || []) as QuoteUnit[];
 
-    const quotes: BookingQuote[] = units.map((unit) => {
+    const quotes: BookingQuote[] = await Promise.all(units.map(async (unit) => {
       const normalizedUnit = {
         id: unit.id,
         name: unit.name || "Acomodação",
@@ -150,15 +160,26 @@ export async function POST(request: Request) {
       }
 
       try {
+        const availableUpgrades = await getAvailableUpgradesForUnit(unit.id);
+        const selectedAvailableUpgrades = availableUpgrades.filter((upgrade) =>
+          payload.selectedUpgradeIds.includes(upgrade.id)
+        );
+
         return {
           unit: normalizedUnit,
           available: true,
+          availableUpgrades,
           pricing: calculateReservationPricing({
             unitId: unit.id,
             basePrice: unit.base_price,
             checkIn: payload.checkIn,
             checkOut: payload.checkOut,
             rules,
+            guestsCount: payload.guestsCount,
+            selectedUpgradeIds: selectedAvailableUpgrades.map(
+              (upgrade) => upgrade.id
+            ),
+            upgrades: selectedAvailableUpgrades,
           }),
         };
       } catch (error) {
@@ -172,7 +193,7 @@ export async function POST(request: Request) {
               : "Não foi possível calcular a tarifa.",
         };
       }
-    });
+    }));
 
     return NextResponse.json({
       ok: true,

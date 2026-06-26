@@ -6,6 +6,11 @@ import {
   calculateReservationPricing,
   type PricingRule,
 } from "@/lib/booking/pricing";
+import {
+  buildReservationUpgradeRows,
+  getSelectedAvailableUpgrades,
+  normalizeSelectedUpgradeIds,
+} from "@/lib/booking/upgrades";
 import { checkUnitAvailability } from "@/lib/booking/availability";
 import { sendReservationCreatedEmail } from "@/lib/email/reservation-emails";
 
@@ -14,6 +19,9 @@ export async function createReservation(formData: FormData) {
   const checkIn = String(formData.get("check_in") || "");
   const checkOut = String(formData.get("check_out") || "");
   const guestsCount = Number(formData.get("guests_count") || 1);
+  const selectedUpgradeIds = normalizeSelectedUpgradeIds(
+    formData.getAll("selected_upgrade_ids")
+  );
 
   const guestName = String(formData.get("guest_name") || "").trim();
   const guestEmail = String(formData.get("guest_email") || "").trim();
@@ -96,12 +104,20 @@ export async function createReservation(formData: FormData) {
     throw new Error(rulesError.message);
   }
 
+  const selectedUpgrades = await getSelectedAvailableUpgrades({
+    unitId,
+    selectedUpgradeIds,
+  });
+
   const pricing = calculateReservationPricing({
     unitId,
     basePrice: unit.base_price,
     checkIn,
     checkOut,
     rules: (rules || []) as PricingRule[],
+    guestsCount,
+    selectedUpgradeIds: selectedUpgrades.map((upgrade) => upgrade.id),
+    upgrades: selectedUpgrades,
   });
 
   const cleaningFee = Number(unit.cleaning_fee || 0);
@@ -176,6 +192,21 @@ export async function createReservation(formData: FormData) {
     );
   }
 
+  if (pricing.upgradesBreakdown.length > 0) {
+    const { error: upgradesError } = await supabase
+      .from("reservation_upgrades")
+      .insert(
+        buildReservationUpgradeRows({
+          reservationId: reservation.id,
+          upgradesBreakdown: pricing.upgradesBreakdown,
+        })
+      );
+
+    if (upgradesError) {
+      throw new Error("Reserva criada, mas não foi possível salvar os upgrades.");
+    }
+  }
+
   try {
     await sendReservationCreatedEmail({
       to: guestEmail,
@@ -186,6 +217,9 @@ export async function createReservation(formData: FormData) {
       guestsCount,
       nights: pricing.nights,
       total,
+      upgradesSummary: pricing.upgradesBreakdown
+        .map((upgrade) => `${upgrade.name}: ${upgrade.total}`)
+        .join("\n"),
     });
   } catch (error) {
     console.error("Erro ao enviar e-mail de reserva criada:", error);

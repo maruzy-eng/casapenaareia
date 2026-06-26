@@ -9,6 +9,7 @@ import {
   CircleDollarSign,
   Loader2,
   Plus,
+  Sparkles,
   UserRound,
   Users,
   X,
@@ -20,6 +21,10 @@ import {
   type ManualReservationPayload,
 } from "@/lib/actions/admin/manual-reservations";
 import type { PricingResult } from "@/lib/booking/pricing";
+import type {
+  AvailableUpgrade,
+  UpgradePricingType,
+} from "@/lib/booking/upgrades";
 
 type UnitOption = {
   id: string;
@@ -44,6 +49,7 @@ type FormState = {
   status: string;
   payment_status: string;
   notes: string;
+  selected_upgrade_ids: string[];
 };
 
 const emptyForm: FormState = {
@@ -58,6 +64,14 @@ const emptyForm: FormState = {
   status: "confirmed",
   payment_status: "pending",
   notes: "",
+  selected_upgrade_ids: [],
+};
+
+const upgradePricingTypeLabels: Record<UpgradePricingType, string> = {
+  per_night: "por noite",
+  per_stay: "por reserva",
+  per_guest_per_night: "por hóspede/noite",
+  per_guest_per_stay: "por hóspede/reserva",
 };
 
 function formatMoney(value: number | string | null | undefined) {
@@ -171,7 +185,7 @@ function PricingPreview({
       <div className="rounded-[1.5rem] border border-[var(--admin-border)] bg-[var(--admin-surface-soft)] p-4">
         <div className="flex items-center gap-3 text-sm font-bold text-[var(--admin-muted)]">
           <Loader2 className="h-4 w-4 animate-spin text-[var(--app-primary)]" />
-          Calculando tarifa com regras de preço...
+          Calculando tarifa com regras de preço e upgrades...
         </div>
       </div>
     );
@@ -216,6 +230,12 @@ function PricingPreview({
             {pricing.nights !== 1 ? "s" : ""} · preço base{" "}
             {formatMoney(pricing.basePrice)}
           </p>
+
+          {pricing.upgradesSubtotal > 0 ? (
+            <p className="mt-1 text-sm font-bold text-[var(--app-primary)]">
+              Upgrades: {formatMoney(pricing.upgradesSubtotal)}
+            </p>
+          ) : null}
         </div>
 
         {pricing.appliedRulesSummary.length > 0 ? (
@@ -237,6 +257,22 @@ function PricingPreview({
       </div>
 
       <div className="mt-4 grid gap-2">
+        {pricing.upgradesBreakdown.map((upgrade) => (
+          <div
+            key={upgrade.id}
+            className="flex items-center justify-between rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3"
+          >
+            <span className="text-sm font-black text-[var(--admin-text)]">
+              {upgrade.name} · {formatMoney(upgrade.unit_price)} x{" "}
+              {upgrade.quantity}
+            </span>
+
+            <span className="text-sm font-black text-[var(--admin-text)]">
+              {formatMoney(upgrade.total)}
+            </span>
+          </div>
+        ))}
+
         {pricing.nightsBreakdown.map((night) => (
           <div
             key={night.date}
@@ -285,6 +321,9 @@ export function ManualReservationModal({
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [pricing, setPricing] = useState<PricingResult | null>(null);
+  const [availableUpgrades, setAvailableUpgrades] = useState<
+    AvailableUpgrade[]
+  >([]);
   const [pricingError, setPricingError] = useState("");
   const [pricingLoading, setPricingLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -305,6 +344,7 @@ export function ManualReservationModal({
 
     if (!canQuote) {
       setPricing(null);
+      setAvailableUpgrades([]);
       setPricingError("");
       setPricingLoading(false);
       return;
@@ -327,6 +367,8 @@ export function ManualReservationModal({
             unitId: form.unit_id,
             checkIn: form.check_in,
             checkOut: form.check_out,
+            guestsCount: Number(form.guests_count || 1),
+            selectedUpgradeIds: form.selected_upgrade_ids,
           }),
         });
 
@@ -336,6 +378,7 @@ export function ManualReservationModal({
 
         if (!response.ok || !data?.ok) {
           setPricing(null);
+          setAvailableUpgrades([]);
           setPricingError(
             data?.message || "Não foi possível calcular a tarifa."
           );
@@ -343,12 +386,16 @@ export function ManualReservationModal({
         }
 
         setPricing(data.pricing as PricingResult);
+        setAvailableUpgrades(
+          (data.availableUpgrades || []) as AvailableUpgrade[]
+        );
       } catch (error) {
         if (cancelled) return;
 
         console.error("Erro ao calcular tarifa:", error);
 
         setPricing(null);
+        setAvailableUpgrades([]);
         setPricingError("Não foi possível calcular a tarifa.");
       } finally {
         if (!cancelled) {
@@ -365,7 +412,15 @@ export function ManualReservationModal({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [open, canQuote, form.unit_id, form.check_in, form.check_out]);
+  }, [
+    open,
+    canQuote,
+    form.unit_id,
+    form.check_in,
+    form.check_out,
+    form.guests_count,
+    form.selected_upgrade_ids,
+  ]);
 
   function updateForm<Key extends keyof FormState>(
     key: Key,
@@ -374,6 +429,7 @@ export function ManualReservationModal({
     setForm((current) => ({
       ...current,
       [key]: value,
+      ...(key === "unit_id" ? { selected_upgrade_ids: [] } : {}),
     }));
 
     setSubmitError("");
@@ -385,6 +441,7 @@ export function ManualReservationModal({
     setOpen(false);
     setForm(emptyForm);
     setPricing(null);
+    setAvailableUpgrades([]);
     setPricingError("");
     setPricingLoading(false);
     setSubmitError("");
@@ -412,6 +469,7 @@ export function ManualReservationModal({
       status: form.status,
       payment_status: form.payment_status,
       notes: form.notes,
+      selected_upgrade_ids: form.selected_upgrade_ids,
     };
 
     startTransition(() => {
@@ -638,6 +696,83 @@ export function ManualReservationModal({
                   className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-3 text-sm font-medium text-[var(--admin-text)] outline-none transition placeholder:text-[var(--admin-muted-2)] focus:border-[var(--app-primary)] focus:ring-4 focus:ring-[var(--app-primary)]/10"
                 />
               </label>
+
+              {availableUpgrades.length > 0 ? (
+                <section className="rounded-[1.5rem] border border-[var(--admin-border)] bg-[var(--admin-surface-soft)] p-4">
+                  <div className="flex items-center gap-3">
+                    <Sparkles className="h-5 w-5 text-[var(--app-primary)]" />
+
+                    <div>
+                      <p className="text-sm font-black text-[var(--admin-text)]">
+                        Upgrades da reserva
+                      </p>
+
+                      <p className="text-xs text-[var(--admin-muted)]">
+                        Marque os extras que entram nesta reserva manual.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    {availableUpgrades.map((upgrade) => {
+                      const selected =
+                        form.selected_upgrade_ids.includes(upgrade.id);
+
+                      return (
+                        <button
+                          key={upgrade.id}
+                          type="button"
+                          onClick={() =>
+                            updateForm(
+                              "selected_upgrade_ids",
+                              selected
+                                ? form.selected_upgrade_ids.filter(
+                                    (id) => id !== upgrade.id
+                                  )
+                                : [
+                                    ...form.selected_upgrade_ids,
+                                    upgrade.id,
+                                  ]
+                            )
+                          }
+                          className={`rounded-2xl border p-4 text-left transition ${
+                            selected
+                              ? "border-[var(--app-primary)] bg-[var(--admin-surface)]"
+                              : "border-[var(--admin-border)] bg-[var(--admin-surface)] hover:border-[var(--app-primary)]/40"
+                          }`}
+                        >
+                          <span className="flex items-start gap-3">
+                            <span
+                              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                                selected
+                                  ? "border-[var(--app-primary)] bg-[var(--app-primary)] text-white"
+                                  : "border-[var(--admin-border)] text-transparent"
+                              }`}
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </span>
+
+                            <span>
+                              <span className="block text-sm font-black text-[var(--admin-text)]">
+                                {upgrade.name}
+                              </span>
+
+                              <span className="mt-1 block text-xs text-[var(--admin-muted)]">
+                                {formatMoney(upgrade.price)}{" "}
+                                {
+                                  upgradePricingTypeLabels[
+                                    upgrade.pricing_type
+                                  ]
+                                }
+                              </span>
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
 
               <PricingPreview
                 pricing={pricing}

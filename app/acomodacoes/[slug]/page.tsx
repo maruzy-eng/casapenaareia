@@ -98,7 +98,7 @@ function differenceInDays(checkIn: string, checkOut: string) {
   return Math.round((end.getTime() - start.getTime()) / 86_400_000);
 }
 
-function buildPaymentUrl({
+function buildReservationUrl({
   unitSlug,
   checkIn,
   checkOut,
@@ -117,7 +117,7 @@ function buildPaymentUrl({
   if (checkOut) params.set("check_out", checkOut);
   if (guests) params.set("guests", guests);
 
-  return `/pagamento?${params.toString()}`;
+  return `/reservar?${params.toString()}`;
 }
 
 function AmenityCard({
@@ -368,7 +368,7 @@ export default async function AccommodationDetailPage({
       ? pricing.total / pricing.nights
       : Number(unit.base_price || 0);
 
-  const paymentUrl = buildPaymentUrl({
+  const reservationUrl = buildReservationUrl({
     unitSlug: slug,
     checkIn,
     checkOut,
@@ -510,7 +510,7 @@ export default async function AccommodationDetailPage({
                   ) : null}
 
                   <Link
-                    href={paymentUrl}
+                    href={reservationUrl}
                     className={`mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#0b5963] transition hover:bg-[#e9f8fa] ${
                       pricingMessage ? "pointer-events-none opacity-60" : ""
                     }`}

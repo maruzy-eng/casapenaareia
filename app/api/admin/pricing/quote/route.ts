@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { calculateReservationPricing } from "@/lib/booking/pricing";
+import {
+  getAvailableUpgradesForUnit,
+  normalizeSelectedUpgradeIds,
+} from "@/lib/booking/upgrades";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -8,6 +12,8 @@ type QuotePayload = {
   unitId?: string;
   checkIn?: string;
   checkOut?: string;
+  guestsCount?: number;
+  selectedUpgradeIds?: string[];
 };
 
 const allowedRoles = ["admin", "administrator", "manager", "editor"];
@@ -38,6 +44,10 @@ export async function POST(request: Request) {
     const unitId = String(payload.unitId || "").trim();
     const checkIn = String(payload.checkIn || "").trim();
     const checkOut = String(payload.checkOut || "").trim();
+    const guestsCount = Number(payload.guestsCount || 1);
+    const selectedUpgradeIds = normalizeSelectedUpgradeIds(
+      payload.selectedUpgradeIds
+    );
 
     if (!unitId || !checkIn || !checkOut) {
       return NextResponse.json(
@@ -147,17 +157,26 @@ export async function POST(request: Request) {
       );
     }
 
+    const availableUpgrades = await getAvailableUpgradesForUnit(unit.id);
+    const selectedAvailableUpgrades = availableUpgrades.filter((upgrade) =>
+      selectedUpgradeIds.includes(upgrade.id)
+    );
+
     const pricing = calculateReservationPricing({
+      selectedUpgradeIds,
+      upgrades: selectedAvailableUpgrades,
       unitId: unit.id,
       basePrice: unit.base_price,
       checkIn,
       checkOut,
       rules: rules || [],
+      guestsCount,
     });
 
     return NextResponse.json({
       ok: true,
       unit,
+      availableUpgrades,
       pricing,
     });
   } catch (error) {
