@@ -6,6 +6,9 @@ type PublicHeaderProps = {
 };
 
 export function PublicHeader({ active }: PublicHeaderProps) {
+  const availabilityHref =
+    active === "home" ? "#buscar-disponibilidade" : "/#buscar-disponibilidade";
+
   return (
     <header className="sticky top-0 z-40 border-b border-[#d7edf0] bg-white/92 backdrop-blur-2xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-3">
@@ -31,7 +34,7 @@ export function PublicHeader({ active }: PublicHeaderProps) {
           </Link>
 
           <Link
-            href="/reservar"
+            href={availabilityHref}
             className={`transition hover:text-[#0b5963] ${
               active === "reservar" ? "text-[#0b5963]" : ""
             }`}
@@ -41,7 +44,7 @@ export function PublicHeader({ active }: PublicHeaderProps) {
         </nav>
 
         <Link
-          href="/reservar"
+          href={availabilityHref}
           className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-[#0b5963] px-5 text-sm font-black text-white transition hover:bg-[#084b54]"
         >
           Reservar agora

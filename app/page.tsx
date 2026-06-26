@@ -40,7 +40,10 @@ function formatMoney(value: number | string | null | undefined) {
 
 function SearchBox() {
   return (
-    <section className="relative z-20 mx-auto -mt-16 max-w-7xl px-5">
+    <section
+      id="buscar-disponibilidade"
+      className="relative z-20 mx-auto -mt-16 max-w-7xl scroll-mt-24 px-5"
+    >
       <form
         action="/acomodacoes"
         className="rounded-[2rem] border border-[#cfe9ed] bg-white p-4 shadow-[0_24px_80px_rgba(7,52,59,0.14)]"
@@ -257,7 +260,7 @@ export default async function HomePage() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/reservar"
+                href="#buscar-disponibilidade"
                 className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#0d6574] to-[#2cb8c5] px-6 text-sm font-black text-white shadow-[0_16px_38px_rgba(13,101,116,0.28)] transition hover:-translate-y-1"
               >
                 Consultar disponibilidade
@@ -354,7 +357,7 @@ export default async function HomePage() {
               </Link>
 
               <Link
-                href="/reservar"
+                href="#buscar-disponibilidade"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#0d6574] px-5 text-sm font-black text-white transition hover:bg-[#073f49]"
               >
                 Solicitar reserva
@@ -394,7 +397,10 @@ export default async function HomePage() {
             <Link href="/acomodacoes" className="hover:text-[#0d6574]">
               Acomodações
             </Link>
-            <Link href="/reservar" className="hover:text-[#0d6574]">
+            <Link
+              href="#buscar-disponibilidade"
+              className="hover:text-[#0d6574]"
+            >
               Reservar
             </Link>
             <Link href="/admin/login" className="hover:text-[#0d6574]">
